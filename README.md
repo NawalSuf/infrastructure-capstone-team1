@@ -1,5 +1,6 @@
 # 🚀 SDA Capstone Project – Django Blog App on AWS
 
+🎥 **Live Demo (Video):**
 [![Watch the Demo](https://img.shields.io/badge/Demo-Video-blue?style=for-the-badge&logo=youtube)](https://drive.google.com/file/d/1i_xnwaK8zpymiDANDBJ9X7LsIB0Dx_lR/view?usp=sharing)
 
 ## 🌍 Project Overview
