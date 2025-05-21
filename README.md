@@ -1,5 +1,7 @@
 # 🚀 SDA Capstone Project – Django Blog App on AWS
 
+[![Watch the Demo](https://img.shields.io/badge/Demo-Video-blue?style=for-the-badge&logo=youtube)](https://drive.google.com/file/d/1i_xnwaK8zpymiDANDBJ9X7LsIB0Dx_lR/view?usp=sharing)
+
 ## 🌍 Project Overview
 
 This project demonstrates the deployment of a scalable Django-based blog application on the AWS cloud using production-level architecture. It utilizes:
