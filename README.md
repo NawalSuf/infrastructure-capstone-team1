@@ -26,10 +26,39 @@ This project demonstrates the deployment of a scalable Django-based blog applica
 #### Subnets:
 
 - Public: `10.90.10.0/24`, `10.90.20.0/24`
+### 🌐 Enabling Auto-Assign Public IP for Public Subnet
+
+<p align="center">
+  <img src="images/subnet-auto-assign-ip.png" alt="Enable Auto-Assign IP Setting on Public Subnet" width="800"/>
+</p>
+
+> ✅ This screenshot shows how we enabled the *Auto-assign Public IPv4 address* for our public subnet (`sda-capstone-public-subnet-1a`).  
+> This is a critical step to ensure EC2 instances launched in this subnet receive public IPs automatically.
+
 - Private: `10.90.11.0/24`, `10.90.21.0/24`
+
+### 🌐 VPC Subnets Structure
+
+<p align="center">
+  <img src="images/vpc-subnets-list.png" alt="VPC Subnets View in AWS Console" width="850"/>
+</p>
+
+> ✅ This screenshot shows the public and private subnets created in two Availability Zones under `sda-capstone-vpc`.  
+> Each subnet was configured with specific CIDR blocks to support scalability and isolation.
+
 
 ✅ Auto-assign public IP enabled for public subnets  
 ✅ Internet Gateway created & attached  
+
+### 🌐 Internet Gateway Attached to VPC
+
+<p align="center">
+  <img src="images/internet-gateway-attached.png" alt="Internet Gateway Attached to VPC" width="850"/>
+</p>
+
+> ✅ Internet Gateway `sda-capstone-igw` successfully created and attached to our custom VPC (`sda-capstone-vpc`).  
+> This allows instances in public subnets to access the internet.
+
 ✅ Route Tables created:
 - Public RT connected to IGW (0.0.0.0/0)
 - Private RT created separately for private subnets
@@ -73,7 +102,7 @@ Stored sensitive credentials securely in AWS SSM:
 
 ➡️ These values will be retrieved in settings.py using boto3
 
-💾 Step 5: RDS – MySQL Database
+### 💾 Step 5: RDS – MySQL Database
 Created a DB Subnet Group with both private subnets
 
 Launched RDS MySQL 8.0 instance named sda-capstone-rds
@@ -107,7 +136,7 @@ DB credentials pulled from SSM inside Django settings
 AWS_STORAGE_BUCKET_NAME = 'sdacapstone-<yourname>-blog'
 AWS_S3_REGION_NAME = 'eu-north-1'
 
-🌐 Step 7: Create NAT Gateway
+### 🌐 Step 7: Create NAT Gateway
 💡 Why? EC2s in private subnets need internet access for updates & GitHub clone
 
 Steps:
@@ -122,7 +151,7 @@ Destination: 0.0.0.0/0
 Target: NAT Gateway
 ✅ Now private EC2 instances can access the internet securely 🚀
 
-⚙️ Step 8: Update settings.py Configuration
+### ⚙️ Step 8: Update settings.py Configuration
 To secure sensitive data, we dynamically pull credentials from SSM using boto3:
 
 def get_ssm_parameters():
@@ -134,7 +163,7 @@ def get_ssm_parameters():
 ✅ Also updated S3 settings, database host (from RDS), and secret key
 ✅ Pushed the changes to GitHub
 
-🧪 Step 9: Test UserData Script on EC2
+### 🧪 Step 9: Test UserData Script on EC2
 🎯 Created a temporary EC2 instance (Ubuntu 22.04) in public subnet
 🔐 Attached IAM Role: sda-capstone-ec2-ssm-s3-full-access
 
@@ -148,7 +177,7 @@ python3 manage.py runserver 0.0.0.0:80
 📸 Verified app at http://<Public-DNS>
 ✅ If success, test server terminated to avoid extra billing
 
-🛡️ Step 10: Launch Admin Node (Monitoring + JumpBox)
+### 🛡️ Step 10: Launch Admin Node (Monitoring + JumpBox)
 🖥️ Created an EC2 instance: SDA-Admin-Node
 
 OS: Amazon Linux 2023
@@ -170,8 +199,17 @@ Grafana
 Ports Open: 22, 3000, 9090, 9100
 
 ✅ hostnamectl set-hostname SDA-Admin-Node
+### 🖥️ EC2 Instances Dashboard (Admin + Web Servers)
 
-🧱 Step 11: Build Full Infrastructure with Terraform
+<p align="center">
+  <img src="images/ec2-instances-dashboard.png" alt="EC2 Instances Running in AWS Console" width="850"/>
+</p>
+
+> ✅ This shows all EC2 instances running: the `SDA-Admin-Node` and two web servers deployed via Auto Scaling.  
+> Status checks are passing, confirming that the instances are healthy and accessible.
+
+
+### 🧱 Step 11: Build Full Infrastructure with Terraform
 🎯 Created Terraform configuration with the following modules:
 
 main.tf, userdata.sh, variables.tf, sec-gr.tf, iam.tf, data.tf, outputs.tf
@@ -185,7 +223,17 @@ terraform apply
 🌐 App accessible via ALB DNS
 📝 Created blog posts successfully
 
-⚙️ Step 12: Configure Ansible Dynamic Inventory
+### 🌍 Deployed Django Blog App via ALB
+
+<p align="center">
+  <img src="images/django-blog-homepage-alb.png" alt="Clarusway Blog App Running on ALB" width="850"/>
+</p>
+
+> ✅ The Django blog application is successfully deployed and accessible through the Application Load Balancer DNS.  
+> Interface loaded with login, register, and about pages.
+
+
+### ⚙️ Step 12: Configure Ansible Dynamic Inventory
 📦 On SDA-Admin-Node:
 
 Created inventory_aws_ec2.yml
@@ -198,14 +246,26 @@ Test:
 ansible-inventory --graph
 ✅ Able to discover EC2s dynamically using tags
 
-🔧 Step 13: Deploy Prometheus Node Exporter via Ansible
+### 🔧 Step 13: Deploy Prometheus Node Exporter via Ansible
 🎯 Created Ansible playbook: prometheus_monitoring_setup.yaml
+<p align="center">
+  <img src="images/step-13-ansible-playbook-node-exporter.png" alt="Ansible Playbook Node Exporter Setup" width="850"/>
+</p>
 🛠 Installed Node Exporter on all EC2s automatically
 
 ansible-playbook prometheus_monitoring_setup.yaml
 ✅ Service enabled and running on port 9100
+### ✅ Node Exporter Running on EC2
 
-📡 Step 14: Prometheus Service Discovery
+<p align="center">
+  <img src="images/node-exporter-running.png" alt="Node Exporter Running on EC2 - Port 9100" width="850"/>
+</p>
+
+> 🟢 Node Exporter is successfully up and running, serving metrics on port `9100`.  
+> This confirms that our Ansible playbook has been executed correctly across all EC2 nodes.
+
+
+### 📡 Step 14: Prometheus Service Discovery
 Edited prometheus.yml to auto-discover EC2s using ec2_sd_configs:
 
 - job_name: 'ec2-node-exporters'
@@ -218,9 +278,16 @@ Edited prometheus.yml to auto-discover EC2s using ec2_sd_configs:
 Ran Prometheus:
 ./prometheus --config.file=prometheus.yml
 
+<p align="center">
+  <img src="images/step-14-prometheus-targets.png" alt="Prometheus Service Discovery Targets" width="850"/>
+</p>
+
+> This screenshot confirms that **Prometheus** is successfully scraping metrics from all running EC2 instances tagged for monitoring.  
+> Targets are dynamically discovered using `ec2_sd_configs` based on EC2 tags (`App: BlogPage`), which ensures high scalability for the monitoring system. 📊✅
+
 📸 Visited http://<Admin-IP>:9090/targets → EC2s detected! ✅
 
-📊 Step 15: Grafana Integration & Dashboard
+### 📊 Step 15: Grafana Integration & Dashboard
 🎯 Opened http://<Admin-IP>:3000
 🔐 Logged in: admin / admin
 
@@ -233,6 +300,15 @@ Imported Dashboard ID 1860 (Node Exporter Full)
 Saw real-time metrics: CPU, RAM, disk, uptime, network...
 
 ✅ Monitoring complete! 🚀
+
+### 📊 Grafana Monitoring Dashboard
+
+<p align="center">
+  <img src="images/grafana-node-exporter-dashboard.png" alt="Grafana Node Exporter Dashboard" width="850"/>
+</p>
+
+> ✅ Real-time monitoring with Grafana using Node Exporter Full Dashboard (ID: 1860).  
+> Displays CPU, RAM, Disk, Network stats, and system load collected from EC2s.
 
 🧼 Clean-up Instructions
 To destroy infrastructure:
@@ -255,7 +331,23 @@ SSM Parameters
 
 VPC
 
-👑 Final Notes
+## 🚧 Challenges Faced
+Throughout the implementation of our capstone project, we encountered several challenges that required troubleshooting, collaboration, and adjustments. These included:
+
+❌ The initial AMI image was incompatible with our region, so we had to search for and configure a suitable one manually.
+
+🔐 Encountered several IAM permission errors that required time-consuming debugging and policy adjustments.
+
+🧱 Some Terraform modules were outdated or misconfigured, leading to deployment failures and resource rollbacks.
+
+🔑 Managing the SSH access for multiple teammates required careful coordination and key sharing.
+
+🛑 File permission issues on the EC2 instance caused problems during Ansible deployment.
+
+⚙️ Environment variables were not being picked up properly by the backend service initially, delaying testing.
+
+
+### 👑 Final Notes
 
 🎓 This project was built as a capstone for Clarusway DevOps Bootcamp
 
